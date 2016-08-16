@@ -193,8 +193,8 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
         fields = self._meta._compiled_read_fields
         if self.many:
             serialize = self._serialize
-            return [serialize(o, fields) for o in instance]
-        return self._serialize(instance, fields)
+            return [serialize(o, fields) for o in obj]
+        return self._serialize(obj, fields)
 
     def to_internal_value(self, data):
         fields = self._meta._compiled_write_fields

@@ -134,7 +134,6 @@ class TestFields(unittest.TestCase):
             self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
             self.assertTrue('deprecated' in str(w[-1].message))
 
-
     def test_field_label(self):
         field1 = StrField(label="@id")
         self.assertEqual(field1.label, "@id")
