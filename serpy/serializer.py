@@ -136,13 +136,11 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
 
     :param instance: The object or objects to serialize.
     :param data: The data to deserialize.
-    :param klass: The class for instantiating the deserialized object
     :param bool many: If ``obj`` is a collection of objects, set ``many`` to
         ``True`` to serialize to a list.
     """
-    # Inner-class
+
     class Meta(object):
-        cls = None
         default_getter = operator.attrgetter
         default_setter = attrsetter
 
@@ -174,21 +172,6 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
 
         return v
 
-    def _deserialize(self, data, fields):
-        v = self._meta.cls()
-        for name, setter, to_internal, call, required, pass_self in fields:
-            if pass_self:
-                setter(self, v, data[name])
-            else:
-                if required:
-                    value = data[name]
-                else:
-                    value = data.get(name)
-                if to_internal and (required or value is not None):
-                    value = to_internal(value)
-                setter(v, value)
-        return v
-
     def to_representation(self, obj):
         fields = self._meta._compiled_read_fields
         if self.many:
@@ -196,12 +179,13 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
             return [serialize(o, fields) for o in obj]
         return self._serialize(obj, fields)
 
-    def to_internal_value(self, data):
-        fields = self._meta._compiled_write_fields
-        if self.many:
-            deserialize = self._deserialize
-            return [deserialize(o, fields) for o in data]
-        return self._deserialize(data, fields)
+    def make_object(self, data):
+        """Return an instance based on the given data.
+
+        Default implementation is to return the data unaltered. Override this
+        method to customise the object type and construction process.
+        """
+        return data
 
     @property
     def data(self):
@@ -220,10 +204,8 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
 
         The return value will be cached for future accesses.
         """
-        # Cache the instance so it doesn't get re-created the next time
-        # `.instance` is accessed.
         if self._instance is None:
-            self._instance = self.to_internal_value(self._initial_data)
+            self._instance = self.make_object(self._initial_data)
         return self._instance
 
 
