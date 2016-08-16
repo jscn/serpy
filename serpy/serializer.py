@@ -215,13 +215,13 @@ class Serializer(six.with_metaclass(SerializerMeta, SerializerBase)):
         return self._data
 
     @property
-    def deserialized_value(self):
+    def instance(self):
         """Get the deserialized value from the :class:`Serializer`.
 
         The return value will be cached for future accesses.
         """
-        # Cache the deserialized_value for next time .deserialized_value is
-        # called.
+        # Cache the instance so it doesn't get re-created the next time
+        # `.instance` is accessed.
         if self._instance is None:
             self._instance = self.to_internal_value(self._initial_data)
         return self._instance

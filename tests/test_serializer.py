@@ -17,7 +17,7 @@ class TestSerializer(unittest.TestCase):
         a = Obj(a=5)
         self.assertEqual(ASerializer(instance=a).data['a'], 5)
 
-        a = ASerializer(data={'a': 5}).deserialized_value
+        a = ASerializer(data={'a': 5}).instance
         self.assertEqual(a.a, 5)
 
     def test_data_and_obj_cached(self):
@@ -35,8 +35,8 @@ class TestSerializer(unittest.TestCase):
         self.assertTrue(data1 is data2)
 
         serializer = ASerializer(data={'a': 5})
-        obj1 = serializer.deserialized_value
-        obj2 = serializer.deserialized_value
+        obj1 = serializer.instance
+        obj2 = serializer.instance
         # Use assertTrue instead of assertIs for python 2.6.
         self.assertTrue(obj1 is obj2)
 
@@ -71,14 +71,14 @@ class TestSerializer(unittest.TestCase):
 
         a = {'a': 5, 'b': 'hello', 'c': 100}
         serializer = ASerializer(data=a)
-        self.assertEqual(serializer.deserialized_value.a, 5)
+        self.assertEqual(serializer.instance.a, 5)
         serializer = ABSerializer(data=a)
-        self.assertEqual(serializer.deserialized_value.a, 5)
-        self.assertEqual(serializer.deserialized_value.b, 'hello')
+        self.assertEqual(serializer.instance.a, 5)
+        self.assertEqual(serializer.instance.b, 'hello')
         serializer = ABCSerializer(data=a)
-        self.assertEqual(serializer.deserialized_value.a, 5)
-        self.assertEqual(serializer.deserialized_value.b, 'hello')
-        self.assertEqual(serializer.deserialized_value.c, 100)
+        self.assertEqual(serializer.instance.a, 5)
+        self.assertEqual(serializer.instance.b, 'hello')
+        self.assertEqual(serializer.instance.c, 100)
 
     def test_many(self):
         class ASerializer(Serializer):
@@ -97,7 +97,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(data[4]['a'], 4)
 
         data = [{'a': 0}, {'a': 1}, {'a': 2}, {'a': 3}, {'a': 4}]
-        objs = ASerializer(data=data, many=True).deserialized_value
+        objs = ASerializer(data=data, many=True).instance
         self.assertEqual(len(objs), 5)
         self.assertEqual(objs[0].a, 0)
         self.assertEqual(objs[1].a, 1)
@@ -122,7 +122,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(BSerializer(instance=b).data['b']['a'], 3)
 
         data = {'b': {'a': 3}}
-        obj = BSerializer(data=data).deserialized_value
+        obj = BSerializer(data=data).instance
         self.assertEqual(obj.b.a, 3)
 
     def test_serializer_as_field_many(self):
@@ -146,7 +146,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(b_data[2]['a'], 2)
 
         data = {'b': [{'a': 0}, {'a': 1}, {'a': 2}]}
-        obj = BSerializer(data=data).deserialized_value
+        obj = BSerializer(data=data).instance
         self.assertEqual(len(obj.b), 3)
         self.assertEqual(obj.b[0].a, 0)
         self.assertEqual(obj.b[1].a, 1)
@@ -168,7 +168,7 @@ class TestSerializer(unittest.TestCase):
         b = Obj(b=lambda: Obj(a=3))
         self.assertEqual(BSerializer(instance=b).data['b']['a'], 3)
         data = {'b': {'a': 3}}
-        b = BSerializer(data=data).deserialized_value
+        b = BSerializer(data=data).instance
         self.assertFalse(hasattr(b, 'b'))
 
     def test_serializer_method_field(self):
@@ -196,7 +196,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(data['a'], 7)
         self.assertEqual(data['b'], 11)
         data = {'a': 7, 'b': 11}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertEqual(obj.a, 2)
         self.assertEqual(obj.b, 2)
 
@@ -215,7 +215,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(data['b'], 6.2)
         self.assertEqual(data['c'], '10')
         data = {'a': 5, 'b': 6.2, 'c': '10'}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertEqual(obj.a, 5)
         self.assertFalse(hasattr(obj, 'b'))
         self.assertFalse(hasattr(obj, 'foo'))
@@ -233,7 +233,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(data['a'], 2)
         self.assertEqual(data['b'], 'hello')
         data = {'a': 2, 'b': 'hello'}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertEqual(obj.a, 2)
         self.assertEqual(obj.foo, 'hello')
 
@@ -248,7 +248,7 @@ class TestSerializer(unittest.TestCase):
         data = ASerializer(instance=o).data
         self.assertEqual(data['a'], 2)
         data = {'a': 2}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertFalse(hasattr(obj, 'a'))
 
     def test_custom_field(self):
@@ -269,7 +269,7 @@ class TestSerializer(unittest.TestCase):
         data = ASerializer(instance=o).data
         self.assertEqual(data['a'], 15)
         data = {'a': 15}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertEqual(obj.a, 10)
 
     def test_optional_field(self):
@@ -284,7 +284,7 @@ class TestSerializer(unittest.TestCase):
         self.assertTrue(data['a'] is None)
 
         data = {'a': None}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertTrue(obj.a is None)
 
         o = Obj(a='5')
@@ -292,7 +292,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(data['a'], 5)
 
         data = {'a': 5}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertEqual(obj.a, 5)
 
         class ASerializer(Serializer):
@@ -307,7 +307,7 @@ class TestSerializer(unittest.TestCase):
         data = {}
         self.assertRaises(
             KeyError,
-            lambda: ASerializer(data=data).deserialized_value
+            lambda: ASerializer(data=data).instance
         )
 
     def test_read_only_field(self):
@@ -322,7 +322,7 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual(data['a'], 5)
 
         data = {'a': 5}
-        obj = ASerializer(data=data).deserialized_value
+        obj = ASerializer(data=data).instance
         self.assertFalse(hasattr(obj, 'a'))
 
     def test_serialization_requires_instance(self):
@@ -343,7 +343,7 @@ class TestSerializer(unittest.TestCase):
 
         self.assertRaises(
             AttributeError,
-            lambda: ASerializer().deserialized_value
+            lambda: ASerializer().instance
         )
 
     def test_deserialization_requires_cls(self):
@@ -352,7 +352,7 @@ class TestSerializer(unittest.TestCase):
 
         data = {'a': 5}
         self.assertRaises(TypeError,
-                          lambda: ASerializer(data=data).deserialized_value)
+                          lambda: ASerializer(data=data).instance)
 
     def test_can_only_do_serialization_or_deserialization(self):
         class ASerializer(Serializer):
@@ -365,7 +365,7 @@ class TestSerializer(unittest.TestCase):
         data = {'a': 5}
         serializer = ASerializer(instance=o, data=data)
         self.assertRaises(AttributeError,
-                          lambda: serializer.deserialized_value)
+                          lambda: serializer.instance)
 
 
 if __name__ == '__main__':
